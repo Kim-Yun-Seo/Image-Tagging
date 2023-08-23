@@ -5,6 +5,6 @@ import { } from 'vue'
 
 <template>
   <q-page padding>
-    main page
+    searching page
   </q-page>
 </template>
