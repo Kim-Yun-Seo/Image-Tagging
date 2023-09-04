@@ -1,78 +1,40 @@
-const express = require('express')();
-const app = express;
-const port = 3000;
+const express = require("express");
+const server = express();
+const app = express();
 
-const bodyParser = require('body-parser');
+server.use(express.static(__dirname + "/public"));
 
-const members = [
-  { id: 3,
-    name: "도서관",
-    loginId: "lib",
-    loginPw:"africa",
-    url: '' },
-  { id: 3,
-    name: "사자",
-    loginId: "lion",
-    loginPw:"cute",
-    url: '' },
-  { id: 3,
-    name: "펭귄",
-    loginId: "peng",
-    loginPw:"cold",
-    url: '' },
-  { id: 4,
-    name: "홍길동",
-    loginId: "a",
-    loginPw:"1",
-    url: 'https://image.jtbcplus.kr/data/contents/jam_photo/202003/30/fb002e68-7a2d-4317-8418-6bc12fde5e71.jpg'  }
-]
+server.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
+});
 
-app.use(bodyParser.json())
+server.post("/file", (req, res) => {
+  res.sendFile(__dirname + "/file.html");
+  console.log(req.file);
+  // res.status(200).send('uploaded');
+});
 
-app.get('/', (req, res) => {
-  res.send("hello world!!!!!!!!!!!!!!")
-})
+// server.use((req, res) => {
+//   res.sendFile(__dirname + "/404.html");
+// });
 
-app.get('/api/account', (req, res) => {
-  // res.send(401)
-})
+const multer = require('multer');
 
-let loginId = ''
-let loginPw = ''
-const urlArr = []
+const upload = multer({
+	dest: 'files/'
+});
 
-const folder = path.join(__dirname, 'files')
+const uploadMiddleware = upload.single('myFile');
 
-if (!fs.existsSync(folder)) {
-  fs.mkdirSync(folder)
-}
+app.use(uploadMiddleware);
 
-app.set('port', port)
+// app.post('/file', (req, res) => {
+//     console.log(req.file);
+//     res.status(200).send('uploaded');
+// });
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*')
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-  next()
-})
-
-app.post('/api/account', (req, res) => {
-  loginId = req.body.loginId
-  loginPw = req.body.loginPw
-  const member = members.find(m => m.loginId === loginId && m.loginPw === loginPw)
-  if (!urlArr.includes(req.body.url)) {
-    // urlArr.push(req.body.url)
-  }
-  members[0].url = req.body.url
-  
-  console.log('urlArr =' , urlArr)
-
-  if (member) {
-    res.send(member)
-  } else {
-    res.send(404)
-  }
-})
-
-app.listen(port, () => {
-  console.log(`서버가 실행됩니다. http://localhost:${port}`)
-})
+server.listen(3000, (err) => {
+  if (err) return console.log(err);
+  console.log("The server is listening on port 3000");
+  console.log(`서버가 실행됩니다. http://localhost:${3000}`)
+});
