@@ -16,25 +16,27 @@ const members = [
     name: "도서관",
     loginId: "lib",
     loginPw:"africa",
-    url: '' },
+    url: '',
+    tag: ['a place', 'lib', 'book', 'silent'] },
   { id: 3,
     name: "사자",
     loginId: "lion",
     loginPw:"cute",
-    url: '' },
+    url: '',
+    tag: ['a lion', 'big', 'mammuls', 'predator'] },
   { id: 3,
     name: "펭귄",
     loginId: "peng",
     loginPw:"cold",
-    url: '' },
+    url: '',
+    tag: ['a penguin', 'cute', 'Antarctica', 'swim'] },
   { id: 4,
     name: "홍길동",
     loginId: "a",
     loginPw:"1",
-    url: 'https://image.jtbcplus.kr/data/contents/jam_photo/202003/30/fb002e68-7a2d-4317-8418-6bc12fde5e71.jpg'  }
+    url: 'https://image.jtbcplus.kr/data/contents/jam_photo/202003/30/fb002e68-7a2d-4317-8418-6bc12fde5e71.jpg',
+    tag: ['a person', 'hero', 'past', 'brave']  }
 ]
-
-
 
 app.use(bodyParser.json())
 
@@ -46,35 +48,18 @@ app.get('/api/account', (req, res) => {
   // res.send(401)
 })
 
+app.get('/tagging', () => {
+  // res.send
+})
+
 let loginId = ''
 let loginPw = ''
 const urlArr = []
-
-// app.get('/api/img', (req, res) => {
-//   console.log('req =' , req)
-//   res.send(req)
-// })
-const folder = path.join(__dirname, 'files')
-
-if (!fs.existsSync(folder)) {
-  fs.mkdirSync(folder)
-}
-
-app.set('port', port)
-// app.use(throttle(1024 * 128)) // throttling bandwidth
-
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*')
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-  next()
-})
-
 
 
 app.post('/api/account', (req, res) => {
   loginId = req.body.loginId
   loginPw = req.body.loginPw
-  // console.log('req.body.url =' , req.body.url.key)
   const member = members.find(m => m.loginId === loginId && m.loginPw === loginPw)
   if (!urlArr.includes(req.body.url)) {
     // urlArr.push(req.body.url)
@@ -90,18 +75,20 @@ app.post('/api/account', (req, res) => {
   }
 })
 
-// app.post('/upload', (req, res) => {
-//   // const form = new formidable.IncomingForm()
+app.post('/tagging', (req, res) => {
+  loginId = req.body.loginId
+  loginPw = req.body.loginPw
+  const member = members.find(m => m.loginId === loginId && m.loginPw === loginPw)
+  members[req.body.loginId].tag = req.body.tag
+  console.log('req.body.tag =' , req.body.tag)
+  console.log(' members[req.body.loginId].tag=' , members[req.body.loginId].tag)
 
-//   form.uploadDir = folder
-//   form.parse(req, (_, fields, files) => {
-//     console.log('\n-----------')
-//     console.log('Fields', fields)
-//     console.log('Received:', Object.keys(files))
-//     console.log()
-//     res.send('Thank you')
-//   })
-// })
+  if (member) {
+    res.send(member)
+  } else {
+    res.send(404)
+  }
+})
 
 app.listen(port, () => {
   console.log(`서버가 실행됩니다. http://localhost:${port}`)
