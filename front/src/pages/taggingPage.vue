@@ -41,6 +41,19 @@ const submit = () => {
   })
 }
 
+const finish = () => {
+  console.log(' state.form.tag=', state.form.tag)
+  const args = {
+    tag: state.form.tag
+  }
+  axios.post('/tagging', args).then((res) => {
+    alert('태그 수정에 성공했습니다.')
+    state.account = res.data
+  }).catch(() => {
+    alert('태그수정에 실패했습니다.')
+  })
+}
+
 axios.get('/api/account').then((res) => {
   console.log(res.data)
   state.account = res.data
@@ -48,6 +61,8 @@ axios.get('/api/account').then((res) => {
 
 console.log('sss =', state.account.url)
 console.log('selected =', imageInfo.value.selected)
+
+addEventListener()
 
 </script>
 
@@ -106,7 +121,6 @@ console.log('selected =', imageInfo.value.selected)
             v-for="(file, index) in imageInfo.files"
             :key="index"
           >
-            <!-- {{ file.key }} -->
             <q-img
               v-ripple
               :class="imageInfo.selected === file.key ? 'selectBorder' : ''"
@@ -115,9 +129,6 @@ console.log('selected =', imageInfo.value.selected)
               style="height: 200px; max-width: 200px"
               @click=" imageInfo.selected = file.key; hi()"
             />
-            <!-- -->
-            <!-- {{ imageInfo.selected }}
-            {{ file.key }} -->
           </template>
         </div>
         <div>
@@ -194,6 +205,25 @@ console.log('selected =', imageInfo.value.selected)
       :src="state.account.url"
       alt=""
     >
+    <br>
+    <q-chip
+      v-for="(tag, index) in state.account.tag"
+      :key="index"
+      color="primary"
+      text-color="white"
+    >
+      {{ tag }}
+    </q-chip>
+    <q-select
+      v-model="state.account.tag"
+      filled
+      use-input
+      use-chips
+      multiple
+      hide-dropdown-icon
+      input-debounce="0"
+      new-value-mode="add-unique"
+    />
   </div>
   <div v-else>
     <label for="longinId">
@@ -212,18 +242,19 @@ console.log('selected =', imageInfo.value.selected)
         type="text"
       >
     </label>
-    <!-- <q-file
-      v-model="model"
-      label="Standard"
-    /> -->
+    <button @click="submit()">
+      로그인
+    </button>
+
     <q-input
       v-model="text"
       label="Standard"
     />
-    <button @click="submit()">
-      로그인
-    </button>
   </div>
+
+  <button @click="finish()">
+    태깅 완료
+  </button>
 </template>
 
 <style>
@@ -231,3 +262,16 @@ console.log('selected =', imageInfo.value.selected)
     width: 100%;
   }
 </style>
+  <!-- <form
+    action="/upload"
+    method="POST"
+    enctype="multipart/form-data"
+  >
+    <input
+      type="file"
+      name="myFile"
+    >
+    <button type="submit">
+      Upload
+    </button>
+  </form> -->

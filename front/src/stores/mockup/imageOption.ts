@@ -3,12 +3,14 @@ export const state = reactive({
   account: {
     id: null,
     name: '',
-    url: ''
+    url: '',
+    tag: []
   },
   form: {
     loginId: '',
     loginPw: '',
-    url: ''
+    url: '',
+    tag: []
   }
 })
 
