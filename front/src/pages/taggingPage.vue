@@ -62,7 +62,7 @@ axios.get('/api/account').then((res) => {
 console.log('sss =', state.account.url)
 console.log('selected =', imageInfo.value.selected)
 
-addEventListener()
+// addEventListener()
 
 </script>
 
