@@ -1,15 +1,32 @@
-// import formidable from 'formidable'
+// // import formidable from 'formidable'
 
-const express = require('express')();
-const app = express;
-const port = 3000;
-// const formidable = require('formidable');
-const path = require('node:path');
-const fs = require('node:fs');
-// throttle = require('express-throttle-bandwidth');
+const
+  express = require('express'),
+  app = express(),
+  formidable = require('formidable'),
+  path = require('node:path'),
+  fs = require('node:fs'),
+  throttle = require('express-throttle-bandwidth')
+  bodyParser = require('body-parser');
 
-const bodyParser = require('body-parser');
-const { checkPrimeSync } = require('crypto');
+const
+  port = process.env.PORT || 3000,
+  folder = path.join(__dirname, 'files')
+
+if (!fs.existsSync(folder)) {
+  fs.mkdirSync(folder)
+}
+
+app.set('port', port)
+app.use(throttle(1024 * 128)) // throttling bandwidth
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  next()
+})
+
+app.use(bodyParser.json())
 
 const members = [
   { id: 3,
@@ -38,7 +55,51 @@ const members = [
     tag: ['a person', 'hero', 'past', 'brave']  }
 ]
 
-app.use(bodyParser.json())
+const test = []
+
+
+
+app.post('/upload', async (req, res) => {
+  const form = new formidable.IncomingForm()
+  // const form = formidable()
+  console.log('POST /upload', form)
+
+  form.uploadDir = folder
+
+  form.multiples = true
+
+  form.parse(req, (err, fields, files) => {
+    // console.log('test1 =' , test)
+    console.log('\n-----------')
+    console.log("error:", err)
+    test.push(Object.keys(files)[0])
+    // console.log('Fields', fields)
+    console.log('files =' , files)
+    console.log('Received:', Object.keys(files))
+    console.log()
+    console.log('test2 =' , test)
+    res.send(test)
+  })
+
+  // form.on('fileBegin', (formname, file) => {
+  //   console.log('fileBegin:', formname, file)
+  // })
+  // form.on('file', (formname, file) => {
+  //   console.log('file', { formname, file });
+  // });
+  
+  // form.on('field', (fieldName, fieldValue) => {
+  //   console.log('field', { fieldName, fieldValue });
+  // });
+  
+  // form.once('end', () => {
+  //   console.log('Done!');
+  // });
+})
+
+app.listen(port, () => {
+  console.log('\nUpload server running on http://localhost:' + port)
+})
 
 app.get('/', (req, res) => {
   res.send("hello world!!!!!!!!!!!!!!")
@@ -54,42 +115,28 @@ app.get('/tagging', () => {
 
 let loginId = ''
 let loginPw = ''
+let tag = []
 const urlArr = []
 
 
 app.post('/api/account', (req, res) => {
+  console.log('req =' , req.body)
   loginId = req.body.loginId
   loginPw = req.body.loginPw
   const member = members.find(m => m.loginId === loginId && m.loginPw === loginPw)
-  if (!urlArr.includes(req.body.url)) {
-    // urlArr.push(req.body.url)
-  }
   members[0].url = req.body.url
-  
-  console.log('urlArr =' , urlArr)
-
-  if (member) {
-    res.send(member)
-  } else {
-    res.send(404)
-  }
-})
-
-app.post('/tagging', (req, res) => {
-  loginId = req.body.loginId
-  loginPw = req.body.loginPw
-  const member = members.find(m => m.loginId === loginId && m.loginPw === loginPw)
-  members[req.body.loginId].tag = req.body.tag
+  console.log('req.body =' , req.body)
   console.log('req.body.tag =' , req.body.tag)
-  console.log(' members[req.body.loginId].tag=' , members[req.body.loginId].tag)
-
+  if (req.body.tag) {
+    members[0].tag = req.body.tag
+  }
   if (member) {
     res.send(member)
   } else {
-    res.send(404)
+    res.send(member)
   }
 })
 
-app.listen(port, () => {
-  console.log(`서버가 실행됩니다. http://localhost:${port}`)
-})
+// app.listen(port, () => {
+//   console.log(`서버가 실행됩니다. http://localhost:${port}`)
+// })
