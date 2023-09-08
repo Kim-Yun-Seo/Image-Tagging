@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import axios from 'axios'
-import { state, imageInfo } from '../stores/mockup/imageOption'
-import { stat } from 'fs'
+import { state, imageInfo, upload } from '../stores/mockup/imageOption'
+// import { stat } from 'fs'
 
 const step = ref(1)
 const done1 = ref(false)
@@ -14,7 +14,13 @@ const reset = () => {
   done3.value = false
   step.value = 1
 }
+const url = 'http://localhost:3000/file/kk'
 const text = ref('')
+const textArr:string[] = []
+const plus = () => {
+  textArr.push(text.value)
+  console.log('textArr =', textArr)
+}
 const hi = () => { imageInfo.value.filesTags = imageInfo.value.files[imageInfo.value.selected].tags }
 const next = () => { done1.value = true; step.value = 2 }
 const next2 = () => { done1.value = true; step.value = 3 }
@@ -25,14 +31,14 @@ const submit = () => {
     const args = {
       loginId: state.form.loginId,
       loginPw: state.form.loginPw,
-      url: text.value
+      url: text.value,
+      tag: state.account.tag
     }
     console.log('아이디 있었고 =')
     axios.post('/api/account', args).then((res) => {
       alert('태그 수정에 성공했습니다.')
-      // state.account = res.data
-
       console.log('--------------22 =', state.account.tag)
+      console.log('--------------33 =', args.tag)
     }).catch(() => {
       alert('태그수정에 실패했습니다.')
     })
@@ -56,6 +62,15 @@ axios.get('/api/account').then((res) => {
   console.log(res.data)
   state.account = res.data
 })
+
+const change = () => {
+  axios.get('/file/kk').then((res) => {
+    console.log('res =', res.data)
+    upload.form.img = res.data
+    console.log('upload.form.img =', upload.form.img)
+    console.log('sksksk =', Object.values(upload.form.img)[0])
+  })
+}
 
 </script>
 
@@ -104,7 +119,7 @@ axios.get('/api/account').then((res) => {
         <div class="q-pa-md">
           <div class="q-gutter-sm row items-start">
             <q-uploader
-              url="http://localhost:3000/upload"
+              :url="url"
               label="사진 첨부"
               multiple
               batch
@@ -112,28 +127,23 @@ axios.get('/api/account').then((res) => {
             />
           </div>
         </div>
-        <form
-          method="POST"
-          enctype="multipart/form-data"
-        >
-          <input
-            type="file"
-            name="myFile"
-          >
-          <button type="submit">
-            Upload
-          </button>
-        </form>
-
         <q-input
           v-model="text"
           label="Standard"
+        />
+        <q-btn
+          label="plus"
+          push
+          color="white"
+          text-color="primary"
+          class="q-mb-md"
+          @click="plus()"
         />
         <q-stepper-navigation>
           <q-btn
             color="primary"
             label="Continue"
-            @click="next(); submit()"
+            @click="next(); submit(); change()"
           />
         </q-stepper-navigation>
       </q-step>
@@ -147,33 +157,37 @@ axios.get('/api/account').then((res) => {
         <div v-if="state.account.id">
           안녕하세요~
           {{ state.account.name }} 님!
-
-          <img
-            v-ripple
-            :src="state.account.url"
-            spinner-color="white"
-            style="height: 200px; max-width: 200px"
-            alt=""
-          >
-          <br>
-          <q-chip
-            v-for="(tag, index) in state.account.tag"
+          <template
+            v-for="(file, index) in textArr"
             :key="index"
-            color="primary"
-            text-color="white"
           >
-            {{ tag }}
-          </q-chip>
-          <q-select
-            v-model="state.account.tag"
-            filled
-            use-input
-            use-chips
-            multiple
-            hide-dropdown-icon
-            input-debounce="0"
-            new-value-mode="add-unique"
-          />
+            <img
+              v-ripple
+              :src="text"
+              spinner-color="white"
+              style="height: 200px; max-width: 200px"
+              alt=""
+            >
+            <br>
+            <q-chip
+              v-for="(tag, index) in state.account.tag"
+              :key="index"
+              color="primary"
+              text-color="white"
+            >
+              {{ tag }}
+            </q-chip>
+            <q-select
+              v-model="state.account.tag"
+              filled
+              use-input
+              use-chips
+              multiple
+              hide-dropdown-icon
+              input-debounce="0"
+              new-value-mode="add-unique"
+            />
+          </template>
         </div>
         <q-stepper-navigation>
           <q-btn
@@ -230,7 +244,6 @@ axios.get('/api/account').then((res) => {
     </template>
   </div>
   <div>
-    <!-- imageInfo.selected === '' -->
     <template v-if="imageInfo.selected === ''">
       <q-chip
         v-for="(tag, index) in imageInfo.filesTags"

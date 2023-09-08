@@ -1,5 +1,3 @@
-// // import formidable from 'formidable'
-
 const
   express = require('express'),
   app = express(),
@@ -55,29 +53,29 @@ const members = [
     tag: ['a person', 'hero', 'past', 'brave']  }
 ]
 
-const test = []
+let test = []
+let loginId = ''
+let loginPw = ''
+let tag = []
+const urlArr = []
 
-
-
-app.post('/upload', async (req, res) => {
+app.post('/file/kk', async (req, res) => {
   const form = new formidable.IncomingForm()
   // const form = formidable()
-  console.log('POST /upload', form)
+  // console.log('POST /upload', form)
 
   form.uploadDir = folder
 
   form.multiples = true
 
   form.parse(req, (err, fields, files) => {
-    // console.log('test1 =' , test)
     console.log('\n-----------')
     console.log("error:", err)
-    test.push(Object.keys(files)[0])
-    // console.log('Fields', fields)
-    console.log('files =' , files)
+    test = Object.keys(files)
+    // test.push(Object.keys(files))
     console.log('Received:', Object.keys(files))
     console.log()
-    console.log('test2 =' , test)
+    console.log('test =' , test)
     res.send(test)
   })
 
@@ -105,38 +103,30 @@ app.get('/', (req, res) => {
   res.send("hello world!!!!!!!!!!!!!!")
 })
 
+app.get('/file/kk', (req, res) => {
+  res.send(test)
+})
+
 app.get('/api/account', (req, res) => {
   // res.send(401)
 })
 
-app.get('/tagging', () => {
-  // res.send
+app.get('upload', (req, res) => {
+  //
 })
 
-let loginId = ''
-let loginPw = ''
-let tag = []
-const urlArr = []
-
-
 app.post('/api/account', (req, res) => {
-  console.log('req =' , req.body)
   loginId = req.body.loginId
   loginPw = req.body.loginPw
   const member = members.find(m => m.loginId === loginId && m.loginPw === loginPw)
   members[0].url = req.body.url
-  console.log('req.body =' , req.body)
-  console.log('req.body.tag =' , req.body.tag)
   if (req.body.tag) {
     members[0].tag = req.body.tag
   }
   if (member) {
+    console.log('member =' , member)
     res.send(member)
   } else {
-    res.send(member)
+    res.send(404)
   }
 })
-
-// app.listen(port, () => {
-//   console.log(`서버가 실행됩니다. http://localhost:${port}`)
-// })

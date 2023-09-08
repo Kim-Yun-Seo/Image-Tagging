@@ -16,7 +16,7 @@ export const state = reactive({
 
 export const upload = reactive({
   form: {
-    img: ''
+    img: []
   }
 })
 

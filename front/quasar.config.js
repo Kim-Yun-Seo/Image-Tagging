@@ -100,6 +100,9 @@ module.exports = configure(function (/* ctx */) {
       proxy: {
         '/api': {
           target: 'http://localhost:3000'
+        },
+        '/file': {
+          target: 'http://localhost:3000'
         }
       }
     },
