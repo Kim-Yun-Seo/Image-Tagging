@@ -60,8 +60,7 @@ app.set('view engine', 'ejs')
 let test = []
 let loginId = ''
 let loginPw = ''
-let tag = []
-const urlArr = []
+let keyArr = ''
 
 app.post('/file', async (req, res) => {
   const form = new formidable.IncomingForm()
@@ -78,13 +77,22 @@ app.post('/file', async (req, res) => {
       // console.log(' file.originalFilename ' , file.originalFilename)
     })
     test = Object.keys(files)
-    // console.log('files =' , files[test[0]][0].newFilename)
-    fs.rename(`${folder}/${files[test[0]][0].newFilename}`,`${folder}/${files[test[0]][0].originalFilename}`, (err) => {
-      if (err) throw err;
-      // rename complete!
+    keyArr = Object.keys(files)
+
+    keyArr.forEach((key) => {
+      console.log('key =' , key)
+      fs.rename(`${folder}/${files[key][0].newFilename}`,`${folder}/${files[key][0].originalFilename}`, (err) => {
+        if (err) throw err;
+        // rename complete!
+      })
     })
-    // console.log('`folder/${files[test[0]][0].newFilename}` =' , `folder/${files[test[0]][0].newFilename}`)
-    // console.log('s-s-s-s-s-s-s =' , files[test[0]][0].filepath)
+    console.log('files =' , files)
+    console.log('files[test[0]] =' , files[test[0]])
+    // const num = files[test[0]].length
+    // console.log('num =' , num)
+
+
+
     console.log('test =' , test)
     res.send(test)
   })

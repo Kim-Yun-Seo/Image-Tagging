@@ -74,7 +74,9 @@ const change = () => {
     upload.form.img = res.data
     console.log('upload.form.img =', upload.form.img)
     console.log('sksksk =', Object.values(upload.form.img)[0])
-    kkk.value.push(`http://localhost:9000/${Object.values(upload.form.img)[0]}`)
+    for (let i = 0; i < Object.values(upload.form.img).length; i++) {
+      kkk.value.push(`http://localhost:9000/${Object.values(upload.form.img)[i]}`)
+    }
     console.log('kkk =', kkk)
   })
 }
@@ -169,8 +171,8 @@ const change = () => {
         :done="done2"
       >
         <div v-if="state.account.id">
-          안녕하세요~
-          {{ state.account.name }} 님!
+          <!-- 안녕하세요~
+          {{ state.account.name }} 님! -->
           <template
             v-for="(file, index) in kkk"
             :key="index"
