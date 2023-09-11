@@ -37,8 +37,9 @@ const
 
 const
   port = process.env.PORT || 3000,
-  folder = path.join('C:/Users/ssamk/reps/Image-Tagging/front/public')
-console.log('dirname =' , __dirname)
+  // folder = path.join('C:/Users/ssamk/reps/Image-Tagging/front/public')
+  folder = path.join(__dirname + '/../front/public')
+console.log('dirname =' , __dirname + '/../front/public')
 
 if (!fs.existsSync(folder)) {
   fs.mkdirSync(folder)
