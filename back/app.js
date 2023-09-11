@@ -1,31 +1,3 @@
-const
-  express = require('express'),
-  app = express(),
-  formidable = require('formidable'),
-  path = require('node:path'),
-  fs = require('node:fs'),
-  throttle = require('express-throttle-bandwidth')
-  bodyParser = require('body-parser');
-
-const
-  port = process.env.PORT || 3000,
-  folder = path.join(__dirname, 'files')
-
-if (!fs.existsSync(folder)) {
-  fs.mkdirSync(folder)
-}
-
-app.set('port', port)
-app.use(throttle(1024 * 128)) // throttling bandwidth
-
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*')
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-  next()
-})
-
-app.use(bodyParser.json())
-
 const members = [
   { id: 3,
     name: "도서관",
@@ -49,9 +21,40 @@ const members = [
     name: "홍길동",
     loginId: "a",
     loginPw:"1",
-    url: 'https://image.jtbcplus.kr/data/contents/jam_photo/202003/30/fb002e68-7a2d-4317-8418-6bc12fde5e71.jpg',
+    url: '',
     tag: ['a person', 'hero', 'past', 'brave']  }
 ]
+
+const
+  express = require('express'),
+  app = express(),
+  formidable = require('formidable'),
+  path = require('node:path'),
+  fs = require('node:fs'),
+  throttle = require('express-throttle-bandwidth')
+  bodyParser = require('body-parser');
+  url = require('url')
+
+const
+  port = process.env.PORT || 3000,
+  folder = path.join('C:/Users/ssamk/reps/Image-Tagging/front/public')
+console.log('dirname =' , __dirname)
+
+if (!fs.existsSync(folder)) {
+  fs.mkdirSync(folder)
+}
+
+app.set('port', port)
+app.use(throttle(1024 * 128))
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  next()
+})
+
+app.use(bodyParser.json())
+app.set('view engine', 'ejs')
 
 let test = []
 let loginId = ''
@@ -59,40 +62,31 @@ let loginPw = ''
 let tag = []
 const urlArr = []
 
-app.post('/file/kk', async (req, res) => {
+app.post('/file', async (req, res) => {
   const form = new formidable.IncomingForm()
-  // const form = formidable()
-  // console.log('POST /upload', form)
-
   form.uploadDir = folder
-
   form.multiples = true
 
   form.parse(req, (err, fields, files) => {
-    console.log('\n-----------')
-    console.log("error:", err)
+    form.on('fileBegin', (formname, file) => {
+      test.push(file.originalFilename)
+      // console.log('file -----------------------=' , file.path)
+      // console.log('file.newFilename =' , file.newFilename)
+      // file.newFilename = file.originalFilename
+      // console.log('file change =' , file.newFilename)
+      // console.log(' file.originalFilename ' , file.originalFilename)
+    })
     test = Object.keys(files)
-    // test.push(Object.keys(files))
-    console.log('Received:', Object.keys(files))
-    console.log()
+    // console.log('files =' , files[test[0]][0].newFilename)
+    fs.rename(`${folder}/${files[test[0]][0].newFilename}`,`${folder}/${files[test[0]][0].originalFilename}`, (err) => {
+      if (err) throw err;
+      // rename complete!
+    })
+    // console.log('`folder/${files[test[0]][0].newFilename}` =' , `folder/${files[test[0]][0].newFilename}`)
+    // console.log('s-s-s-s-s-s-s =' , files[test[0]][0].filepath)
     console.log('test =' , test)
     res.send(test)
   })
-
-  // form.on('fileBegin', (formname, file) => {
-  //   console.log('fileBegin:', formname, file)
-  // })
-  // form.on('file', (formname, file) => {
-  //   console.log('file', { formname, file });
-  // });
-  
-  // form.on('field', (fieldName, fieldValue) => {
-  //   console.log('field', { fieldName, fieldValue });
-  // });
-  
-  // form.once('end', () => {
-  //   console.log('Done!');
-  // });
 })
 
 app.listen(port, () => {
@@ -103,7 +97,7 @@ app.get('/', (req, res) => {
   res.send("hello world!!!!!!!!!!!!!!")
 })
 
-app.get('/file/kk', (req, res) => {
+app.get('/file', (req, res) => {
   res.send(test)
 })
 
@@ -124,7 +118,7 @@ app.post('/api/account', (req, res) => {
     members[0].tag = req.body.tag
   }
   if (member) {
-    console.log('member =' , member)
+    // console.log('member =' , member)
     res.send(member)
   } else {
     res.send(404)

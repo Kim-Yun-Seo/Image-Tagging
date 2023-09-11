@@ -8,13 +8,14 @@ const step = ref(1)
 const done1 = ref(false)
 const done2 = ref(false)
 const done3 = ref(false)
+const files = ref(null)
 const reset = () => {
   done1.value = false
   done2.value = false
   done3.value = false
   step.value = 1
 }
-const url = 'http://localhost:3000/file/kk'
+const url = 'http://localhost:3000/file'
 const text = ref('')
 const textArr:string[] = []
 const plus = () => {
@@ -34,9 +35,10 @@ const submit = () => {
       url: text.value,
       tag: state.account.tag
     }
-    console.log('아이디 있었고 =')
+
     axios.post('/api/account', args).then((res) => {
       alert('태그 수정에 성공했습니다.')
+      console.log('files =', files)
       console.log('--------------22 =', state.account.tag)
       console.log('--------------33 =', args.tag)
     }).catch(() => {
@@ -48,9 +50,10 @@ const submit = () => {
       loginPw: state.form.loginPw,
       url: text.value
     }
-    console.log('아이디 없었고 =')
+
     axios.post('/api/account', args).then((res) => {
       alert('로그인에 성공했습니다')
+      console.log('state.account.tag =', state.account.tag)
       state.account = res.data
     }).catch(() => {
       alert('로그인에 실패했습니다. 계정 정보를 확인해주세요')
@@ -63,19 +66,26 @@ axios.get('/api/account').then((res) => {
   state.account = res.data
 })
 
+const kkk = ref([])
+
 const change = () => {
-  axios.get('/file/kk').then((res) => {
+  axios.get('/file').then((res) => {
     console.log('res =', res.data)
     upload.form.img = res.data
     console.log('upload.form.img =', upload.form.img)
     console.log('sksksk =', Object.values(upload.form.img)[0])
+    kkk.value.push(`http://localhost:9000/${Object.values(upload.form.img)[0]}`)
+    console.log('kkk =', kkk)
   })
 }
-
 </script>
 
 <template>
   <div class="q-pa-md">
+    <!-- <img
+      :src="kkk"
+      alt=""
+    > -->
     <q-btn
       label="Reset"
       push
@@ -97,9 +107,6 @@ const change = () => {
         icon="settings"
         :done="done1"
       >
-        <div id="imagePreview">
-          <img id="img">
-        </div>
         <label for="longinId">
           <span>아이디</span>
           <input
@@ -117,13 +124,20 @@ const change = () => {
           >
         </label>
         <div class="q-pa-md">
+          <!-- <q-file
+            v-model="files"
+            label="Pick files"
+            filled
+            multiple
+            style="max-width: 300px"
+          /> -->
           <div class="q-gutter-sm row items-start">
             <q-uploader
               :url="url"
               label="사진 첨부"
               multiple
               batch
-              style="max-width: 300px"
+              style="max-width: 500px"
             />
           </div>
         </div>
@@ -158,25 +172,25 @@ const change = () => {
           안녕하세요~
           {{ state.account.name }} 님!
           <template
-            v-for="(file, index) in textArr"
+            v-for="(file, index) in kkk"
             :key="index"
           >
             <img
               v-ripple
-              :src="text"
+              :src="file"
               spinner-color="white"
               style="height: 200px; max-width: 200px"
               alt=""
             >
             <br>
-            <q-chip
+            <!-- <q-chip
               v-for="(tag, index) in state.account.tag"
               :key="index"
               color="primary"
               text-color="white"
             >
               {{ tag }}
-            </q-chip>
+            </q-chip> -->
             <q-select
               v-model="state.account.tag"
               filled
@@ -211,6 +225,27 @@ const change = () => {
         :done="done3"
       >
         태그 저장 완료
+        <template
+          v-for="(file, index) in kkk"
+          :key="index"
+        >
+          <img
+            v-ripple
+            :src="file"
+            spinner-color="white"
+            style="height: 200px; max-width: 200px"
+            alt=""
+          >
+          <br>
+          <q-chip
+            v-for="(tag, index) in state.account.tag"
+            :key="index"
+            color="primary"
+            text-color="white"
+          >
+            {{ tag }}
+          </q-chip>
+        </template>
         <q-stepper-navigation>
           <q-btn
             color="primary"
