@@ -30,8 +30,8 @@ const submit = () => {
   console.log('-------------- =', state.account.tag)
   if (state.account.id) {
     const args = {
-      loginId: state.form.loginId,
-      loginPw: state.form.loginPw,
+      // loginId: state.form.loginId,
+      // loginPw: state.form.loginPw,
       url: text.value,
       tag: state.account.tag
     }
@@ -46,17 +46,17 @@ const submit = () => {
     })
   } else {
     const args = {
-      loginId: state.form.loginId,
-      loginPw: state.form.loginPw,
+      // loginId: state.form.loginId,
+      // loginPw: state.form.loginPw,
       url: text.value
     }
 
     axios.post('/api/account', args).then((res) => {
-      alert('로그인에 성공했습니다')
+      alert('파일 업로드에 성공했습니다')
       console.log('state.account.tag =', state.account.tag)
       state.account = res.data
     }).catch(() => {
-      alert('로그인에 실패했습니다. 계정 정보를 확인해주세요')
+      alert('파일 업로드에 실패했습니다. 연결상태를 확인해주세요')
     })
   }
 }
@@ -66,7 +66,7 @@ axios.get('/api/account').then((res) => {
   state.account = res.data
 })
 
-const kkk = ref([])
+const imgurl = ref([])
 
 const change = () => {
   axios.get('/file').then((res) => {
@@ -75,19 +75,15 @@ const change = () => {
     console.log('upload.form.img =', upload.form.img)
     console.log('sksksk =', Object.values(upload.form.img)[0])
     for (let i = 0; i < Object.values(upload.form.img).length; i++) {
-      kkk.value.push(`http://localhost:9000/${Object.values(upload.form.img)[i]}`)
+      imgurl.value.push(`http://localhost:9000/img/${Object.values(upload.form.img)[i]}`)
     }
-    console.log('kkk =', kkk)
+    console.log('imgurl =', imgurl)
   })
 }
 </script>
 
 <template>
   <div class="q-pa-md">
-    <!-- <img
-      :src="kkk"
-      alt=""
-    > -->
     <q-btn
       label="Reset"
       push
@@ -109,30 +105,7 @@ const change = () => {
         icon="settings"
         :done="done1"
       >
-        <label for="longinId">
-          <span>아이디</span>
-          <input
-            id="loginId"
-            v-model="state.form.loginId"
-            type="text"
-          >
-        </label>
-        <label for="longinPw">
-          <span>비밀번호</span>
-          <input
-            id="loginPw"
-            v-model="state.form.loginPw"
-            type="text"
-          >
-        </label>
         <div class="q-pa-md">
-          <!-- <q-file
-            v-model="files"
-            label="Pick files"
-            filled
-            multiple
-            style="max-width: 300px"
-          /> -->
           <div class="q-gutter-sm row items-start">
             <q-uploader
               :url="url"
@@ -143,18 +116,6 @@ const change = () => {
             />
           </div>
         </div>
-        <q-input
-          v-model="text"
-          label="Standard"
-        />
-        <q-btn
-          label="plus"
-          push
-          color="white"
-          text-color="primary"
-          class="q-mb-md"
-          @click="plus()"
-        />
         <q-stepper-navigation>
           <q-btn
             color="primary"
@@ -171,10 +132,8 @@ const change = () => {
         :done="done2"
       >
         <div v-if="state.account.id">
-          <!-- 안녕하세요~
-          {{ state.account.name }} 님! -->
           <template
-            v-for="(file, index) in kkk"
+            v-for="(file, index) in imgurl"
             :key="index"
           >
             <img
@@ -185,14 +144,6 @@ const change = () => {
               alt=""
             >
             <br>
-            <!-- <q-chip
-              v-for="(tag, index) in state.account.tag"
-              :key="index"
-              color="primary"
-              text-color="white"
-            >
-              {{ tag }}
-            </q-chip> -->
             <q-select
               v-model="state.account.tag"
               filled
@@ -226,9 +177,8 @@ const change = () => {
         icon="add_comment"
         :done="done3"
       >
-        태그 저장 완료
         <template
-          v-for="(file, index) in kkk"
+          v-for="(file, index) in imgurl"
           :key="index"
         >
           <img
@@ -239,14 +189,16 @@ const change = () => {
             alt=""
           >
           <br>
-          <q-chip
-            v-for="(tag, index) in state.account.tag"
-            :key="index"
-            color="primary"
-            text-color="white"
-          >
-            {{ tag }}
-          </q-chip>
+          <div>
+            <q-chip
+              v-for="(tag, index) in state.account.tag"
+              :key="index"
+              color="primary"
+              text-color="white"
+            >
+              {{ tag }}
+            </q-chip>
+          </div>
         </template>
         <q-stepper-navigation>
           <q-btn
@@ -265,7 +217,7 @@ const change = () => {
       </q-step>
     </q-stepper>
   </div>
-  <div class="q-pa-md row items-start q-gutter-md">
+  <!-- <div class="q-pa-md row items-start q-gutter-md">
     <template
       v-for="(file, index) in imageInfo.files"
       :key="index"
@@ -303,5 +255,5 @@ const change = () => {
         new-value-mode="add-unique"
       />
     </template>
-  </div>
+  </div> -->
 </template>

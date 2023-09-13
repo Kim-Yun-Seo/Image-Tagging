@@ -1,26 +1,18 @@
 const members = [
   { id: 3,
     name: "도서관",
-    loginId: "lib",
-    loginPw:"africa",
     url: '',
     tag: ['a place', 'lib', 'book', 'silent'] },
   { id: 3,
     name: "사자",
-    loginId: "lion",
-    loginPw:"cute",
     url: '',
     tag: ['a lion', 'big', 'mammuls', 'predator'] },
   { id: 3,
     name: "펭귄",
-    loginId: "peng",
-    loginPw:"cold",
     url: '',
     tag: ['a penguin', 'cute', 'Antarctica', 'swim'] },
   { id: 4,
     name: "홍길동",
-    loginId: "a",
-    loginPw:"1",
     url: '',
     tag: ['a person', 'hero', 'past', 'brave']  }
 ]
@@ -38,8 +30,8 @@ const
 const
   port = process.env.PORT || 3000,
   // folder = path.join('C:/Users/ssamk/reps/Image-Tagging/front/public')
-  folder = path.join(__dirname + '/../front/public')
-console.log('dirname =' , __dirname + '/../front/public')
+  folder = path.join(__dirname + '/../front/public/', 'img')
+console.log('dirname =' , __dirname + '/../front/public/img')
 
 if (!fs.existsSync(folder)) {
   fs.mkdirSync(folder)
@@ -70,11 +62,6 @@ app.post('/file', async (req, res) => {
   form.parse(req, (err, fields, files) => {
     form.on('fileBegin', (formname, file) => {
       test.push(file.originalFilename)
-      // console.log('file -----------------------=' , file.path)
-      // console.log('file.newFilename =' , file.newFilename)
-      // file.newFilename = file.originalFilename
-      // console.log('file change =' , file.newFilename)
-      // console.log(' file.originalFilename ' , file.originalFilename)
     })
     test = Object.keys(files)
     keyArr = Object.keys(files)
@@ -86,14 +73,6 @@ app.post('/file', async (req, res) => {
         // rename complete!
       })
     })
-    console.log('files =' , files)
-    console.log('files[test[0]] =' , files[test[0]])
-    // const num = files[test[0]].length
-    // console.log('num =' , num)
-
-
-
-    console.log('test =' , test)
     res.send(test)
   })
 })
@@ -111,7 +90,7 @@ app.get('/file', (req, res) => {
 })
 
 app.get('/api/account', (req, res) => {
-  // res.send(401)
+  //
 })
 
 app.get('upload', (req, res) => {
@@ -119,15 +98,15 @@ app.get('upload', (req, res) => {
 })
 
 app.post('/api/account', (req, res) => {
-  loginId = req.body.loginId
-  loginPw = req.body.loginPw
-  const member = members.find(m => m.loginId === loginId && m.loginPw === loginPw)
-  members[0].url = req.body.url
+  // loginId = req.body.loginId
+  // loginPw = req.body.loginPw
+  // const member = members.find(m => m.loginId === loginId && m.loginPw === loginPw)
+  const member = members[0]
+  // 여기서 맞는 tag를 찾아주는 과정을 하면 된다
   if (req.body.tag) {
     members[0].tag = req.body.tag
   }
   if (member) {
-    // console.log('member =' , member)
     res.send(member)
   } else {
     res.send(404)
