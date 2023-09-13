@@ -1,97 +1,59 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import axios from 'axios'
-import { state, imageInfo, upload } from '../stores/mockup/imageOption'
-// import { stat } from 'fs'
 
 const step = ref(1)
 const done1 = ref(false)
 const done2 = ref(false)
 const done3 = ref(false)
-const files = ref(null)
-const reset = () => {
-  done1.value = false
-  done2.value = false
-  done3.value = false
-  step.value = 1
-}
 const url = 'http://localhost:3000/file'
-const text = ref('')
-const textArr:string[] = []
-const plus = () => {
-  textArr.push(text.value)
-  console.log('textArr =', textArr)
-}
-const hi = () => { imageInfo.value.filesTags = imageInfo.value.files[imageInfo.value.selected].tags }
 const next = () => { done1.value = true; step.value = 2 }
-const next2 = () => { done1.value = true; step.value = 3 }
+const next2 = () => { done2.value = true; step.value = 3 }
+const sendInfo = ref({})
+const imgurl = ref([])
+let count = 0
 
-const submit = () => {
-  console.log('-------------- =', state.account.tag)
-  if (state.account.id) {
-    const args = {
-      // loginId: state.form.loginId,
-      // loginPw: state.form.loginPw,
-      url: text.value,
-      tag: state.account.tag
-    }
-
-    axios.post('/api/account', args).then((res) => {
-      alert('태그 수정에 성공했습니다.')
-      console.log('files =', files)
-      console.log('--------------22 =', state.account.tag)
-      console.log('--------------33 =', args.tag)
-    }).catch(() => {
-      alert('태그수정에 실패했습니다.')
-    })
+const fileUpload = () => {
+  if (count !== 0) {
+    //
   } else {
-    const args = {
-      // loginId: state.form.loginId,
-      // loginPw: state.form.loginPw,
-      url: text.value
-    }
-
-    axios.post('/api/account', args).then((res) => {
+    axios.post('/api/account').then((res) => {
       alert('파일 업로드에 성공했습니다')
-      console.log('state.account.tag =', state.account.tag)
-      state.account = res.data
+      count += 1
+      sendInfo.value = res.data
     }).catch(() => {
       alert('파일 업로드에 실패했습니다. 연결상태를 확인해주세요')
     })
   }
 }
 
-axios.get('/api/account').then((res) => {
-  console.log(res.data)
-  state.account = res.data
-})
+const tagCRUD = () => {
+  const args = {
+    sendInfo: sendInfo.value
+  }
+  axios.post('/api/account', args).then((res) => {
+    alert('태그 수정에 성공했습니다.')
+  }).catch(() => {
+    alert('태그수정에 실패했습니다.')
+  })
+}
 
-const imgurl = ref([])
+axios.get('/api/account').then((res) => {
+  sendInfo.value = res.data
+})
 
 const change = () => {
   axios.get('/file').then((res) => {
-    console.log('res =', res.data)
-    upload.form.img = res.data
-    console.log('upload.form.img =', upload.form.img)
-    console.log('sksksk =', Object.values(upload.form.img)[0])
-    for (let i = 0; i < Object.values(upload.form.img).length; i++) {
-      imgurl.value.push(`http://localhost:9000/img/${Object.values(upload.form.img)[i]}`)
+    // console.log('res =', res.data)
+    for (let i = 0; i < Object.keys(res.data).length; i++) {
+      imgurl.value.push(Object.keys(res.data)[i])
     }
-    console.log('imgurl =', imgurl)
   })
 }
 </script>
 
 <template>
   <div class="q-pa-md">
-    <q-btn
-      label="Reset"
-      push
-      color="white"
-      text-color="primary"
-      class="q-mb-md"
-      @click="reset"
-    />
     <q-stepper
       ref="stepper"
       v-model="step"
@@ -120,7 +82,7 @@ const change = () => {
           <q-btn
             color="primary"
             label="Continue"
-            @click="next(); submit(); change()"
+            @click="next(); fileUpload(); change()"
           />
         </q-stepper-navigation>
       </q-step>
@@ -131,21 +93,20 @@ const change = () => {
         icon="create_new_folder"
         :done="done2"
       >
-        <div v-if="state.account.id">
+        <div v-if="sendInfo">
           <template
             v-for="(file, index) in imgurl"
             :key="index"
           >
             <img
               v-ripple
-              :src="file"
+              :src="`http://localhost:9000/img/${file}`"
               spinner-color="white"
               style="height: 200px; max-width: 200px"
-              alt=""
             >
             <br>
             <q-select
-              v-model="state.account.tag"
+              v-model="sendInfo[file]"
               filled
               use-input
               use-chips
@@ -160,7 +121,7 @@ const change = () => {
           <q-btn
             color="primary"
             label="tagging"
-            @click="next2(); submit()"
+            @click="next2(); tagCRUD()"
           />
           <q-btn
             flat
@@ -183,7 +144,7 @@ const change = () => {
         >
           <img
             v-ripple
-            :src="file"
+            :src="`http://localhost:9000/img/${file}`"
             spinner-color="white"
             style="height: 200px; max-width: 200px"
             alt=""
@@ -191,8 +152,8 @@ const change = () => {
           <br>
           <div>
             <q-chip
-              v-for="(tag, index) in state.account.tag"
-              :key="index"
+              v-for="(tag, index_) in sendInfo[file]"
+              :key="index_"
               color="primary"
               text-color="white"
             >
@@ -217,43 +178,4 @@ const change = () => {
       </q-step>
     </q-stepper>
   </div>
-  <!-- <div class="q-pa-md row items-start q-gutter-md">
-    <template
-      v-for="(file, index) in imageInfo.files"
-      :key="index"
-    >
-      <q-img
-        v-ripple
-        :class="imageInfo.selected === file.key ? 'selectBorder' : ''"
-        :src="file.src"
-        spinner-color="white"
-        style="height: 200px; max-width: 200px"
-        @click=" imageInfo.selected = file.key; hi()"
-      />
-    </template>
-  </div>
-  <div>
-    <template v-if="imageInfo.selected === ''">
-      <q-chip
-        v-for="(tag, index) in imageInfo.filesTags"
-        :key="index"
-        color="primary"
-        text-color="white"
-      >
-        {{ tag }}
-      </q-chip>
-    </template>
-    <template v-else>
-      <q-select
-        v-model="imageInfo.files[imageInfo.selected].tags"
-        filled
-        use-input
-        use-chips
-        multiple
-        hide-dropdown-icon
-        input-debounce="0"
-        new-value-mode="add-unique"
-      />
-    </template>
-  </div> -->
 </template>

@@ -1,21 +1,6 @@
-const members = [
-  { id: 3,
-    name: "도서관",
-    url: '',
-    tag: ['a place', 'lib', 'book', 'silent'] },
-  { id: 3,
-    name: "사자",
-    url: '',
-    tag: ['a lion', 'big', 'mammuls', 'predator'] },
-  { id: 3,
-    name: "펭귄",
-    url: '',
-    tag: ['a penguin', 'cute', 'Antarctica', 'swim'] },
-  { id: 4,
-    name: "홍길동",
-    url: '',
-    tag: ['a person', 'hero', 'past', 'brave']  }
-]
+let sendInfo = {
+  // fileName: [1,2,3,4]
+}
 
 const
   express = require('express'),
@@ -23,36 +8,33 @@ const
   formidable = require('formidable'),
   path = require('node:path'),
   fs = require('node:fs'),
-  throttle = require('express-throttle-bandwidth')
   bodyParser = require('body-parser');
   url = require('url')
-
-const
   port = process.env.PORT || 3000,
-  // folder = path.join('C:/Users/ssamk/reps/Image-Tagging/front/public')
   folder = path.join(__dirname + '/../front/public/', 'img')
-console.log('dirname =' , __dirname + '/../front/public/img')
-
-if (!fs.existsSync(folder)) {
-  fs.mkdirSync(folder)
-}
-
-app.set('port', port)
-app.use(throttle(1024 * 128))
+  // throttle = require('express-throttle-bandwidth')
+  // 이걸 사용하면 이미지 파일 첨부가 오래걸림... 도대체 왜......
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
   next()
 })
-
 app.use(bodyParser.json())
-app.set('view engine', 'ejs')
+app.set('port', port)
+// app.use(throttle(1024 * 128))
 
-let test = []
-let loginId = ''
-let loginPw = ''
+let imgNameArr = []
 let keyArr = ''
+let count = 0
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+if (!fs.existsSync(folder)) {
+  fs.mkdirSync(folder)
+}
 
 app.post('/file', async (req, res) => {
   const form = new formidable.IncomingForm()
@@ -61,53 +43,53 @@ app.post('/file', async (req, res) => {
 
   form.parse(req, (err, fields, files) => {
     form.on('fileBegin', (formname, file) => {
-      test.push(file.originalFilename)
+      imgNameArr.push(file.originalFilename)
     })
-    test = Object.keys(files)
+    imgNameArr = Object.keys(files)
     keyArr = Object.keys(files)
-
     keyArr.forEach((key) => {
-      console.log('key =' , key)
+      let getProperty = (key) => {
+        return sendInfo[key] = [rand(1,50),rand(1,50),rand(1,50)]
+        // 이거 나중에 갯수도 random 하게 들어가게
+      }
+      getProperty(key)
       fs.rename(`${folder}/${files[key][0].newFilename}`,`${folder}/${files[key][0].originalFilename}`, (err) => {
         if (err) throw err;
         // rename complete!
       })
     })
-    res.send(test)
+    res.send(sendInfo)
   })
 })
 
 app.listen(port, () => {
-  console.log('\nUpload server running on http://localhost:' + port)
+  console.log(`Upload server running on http://localhost:${port}`)
+  // console.log('\nUpload server running on http://localhost:' + port)
 })
 
 app.get('/', (req, res) => {
-  res.send("hello world!!!!!!!!!!!!!!")
+  res.send("hello world")
 })
 
 app.get('/file', (req, res) => {
-  res.send(test)
+  res.send(sendInfo)
 })
 
 app.get('/api/account', (req, res) => {
   //
 })
 
-app.get('upload', (req, res) => {
-  //
-})
-
 app.post('/api/account', (req, res) => {
-  // loginId = req.body.loginId
-  // loginPw = req.body.loginPw
-  // const member = members.find(m => m.loginId === loginId && m.loginPw === loginPw)
-  const member = members[0]
-  // 여기서 맞는 tag를 찾아주는 과정을 하면 된다
-  if (req.body.tag) {
-    members[0].tag = req.body.tag
-  }
-  if (member) {
-    res.send(member)
+  if (sendInfo) {
+    if (count > 0) {
+      sendInfo = req.body
+      console.log('req =' , req.body)
+      // 여기에 마지막 최종본이 들어온다.
+      res.send(sendInfo)
+    } else {
+      count += 1
+      res.send(sendInfo)
+    }
   } else {
     res.send(404)
   }
