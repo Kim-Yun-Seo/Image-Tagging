@@ -12,8 +12,6 @@ const
   url = require('url')
   port = process.env.PORT || 3000,
   folder = path.join(__dirname + '/../front/public/', 'img')
-  // throttle = require('express-throttle-bandwidth')
-  // 이걸 사용하면 이미지 파일 첨부가 오래걸림... 도대체 왜......
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
@@ -22,7 +20,6 @@ app.use((req, res, next) => {
 })
 app.use(bodyParser.json())
 app.set('port', port)
-// app.use(throttle(1024 * 128))
 
 let imgNameArr = []
 let keyArr = ''
@@ -49,13 +46,11 @@ app.post('/file', async (req, res) => {
     keyArr = Object.keys(files)
     keyArr.forEach((key) => {
       let getProperty = (key) => {
-        return sendInfo[key] = [rand(1,50),rand(1,50),rand(1,50)]
-        // 이거 나중에 갯수도 random 하게 들어가게
+        return sendInfo[key] = [rand(1,50),rand(1,50)]
       }
       getProperty(key)
       fs.rename(`${folder}/${files[key][0].newFilename}`,`${folder}/${files[key][0].originalFilename}`, (err) => {
         if (err) throw err;
-        // rename complete!
       })
     })
     res.send(sendInfo)
@@ -64,7 +59,6 @@ app.post('/file', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Upload server running on http://localhost:${port}`)
-  // console.log('\nUpload server running on http://localhost:' + port)
 })
 
 app.get('/', (req, res) => {
@@ -82,9 +76,18 @@ app.get('/api/account', (req, res) => {
 app.post('/api/account', (req, res) => {
   if (sendInfo) {
     if (count > 0) {
+      const date = new Date();
+      const hour = date.getHours()
+      const min = date.getMinutes()
+      const milli = date.getMilliseconds()
+
       sendInfo = req.body
-      console.log('req =' , req.body)
-      // 여기에 마지막 최종본이 들어온다.
+      fs.writeFile(`tagging_${hour}${min}${milli}.json`, JSON.stringify(sendInfo), function(err) {})
+      fs.readFile(`tagging_${hour}${min}${milli}.json`, (err, data) => {
+        if (err) throw err;
+        // const readFMjson = JSON.parse(data.toString());
+        // console.log('readFMjson =' , readFMjson)
+      })
       res.send(sendInfo)
     } else {
       count += 1

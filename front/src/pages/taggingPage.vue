@@ -14,9 +14,7 @@ const imgurl = ref([])
 let count = 0
 
 const fileUpload = () => {
-  if (count !== 0) {
-    //
-  } else {
+  if (count === 0) {
     axios.post('/api/account').then((res) => {
       alert('파일 업로드에 성공했습니다')
       count += 1
@@ -38,18 +36,17 @@ const tagCRUD = () => {
   })
 }
 
-axios.get('/api/account').then((res) => {
-  sendInfo.value = res.data
-})
-
 const change = () => {
   axios.get('/file').then((res) => {
-    // console.log('res =', res.data)
     for (let i = 0; i < Object.keys(res.data).length; i++) {
       imgurl.value.push(Object.keys(res.data)[i])
     }
   })
 }
+
+axios.get('/api/account').then((res) => {
+  sendInfo.value = res.data
+})
 </script>
 
 <template>
@@ -98,12 +95,12 @@ const change = () => {
             v-for="(file, index) in imgurl"
             :key="index"
           >
-            <img
+            <q-img
               v-ripple
               :src="`http://localhost:9000/img/${file}`"
               spinner-color="white"
               style="height: 200px; max-width: 200px"
-            >
+            />
             <br>
             <q-select
               v-model="sendInfo[file]"
@@ -127,7 +124,6 @@ const change = () => {
             flat
             color="primary"
             label="Back"
-            class="q-ml-sm"
             @click="step = 1"
           />
         </q-stepper-navigation>
@@ -171,7 +167,6 @@ const change = () => {
             flat
             color="primary"
             label="Back"
-            class="q-ml-sm"
             @click="step = 2"
           />
         </q-stepper-navigation>
